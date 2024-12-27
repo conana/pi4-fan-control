@@ -8,6 +8,7 @@ import logging
 import logging.handlers
 import json
 import os
+from datetime import datetime, timedelta
 
 class FanController:
     def __init__(self, config_path='/opt/pi4-fan/config.json'):
@@ -23,6 +24,8 @@ class FanController:
         
         self.config = self.load_config(config_path)
         self.current_duty_cycle = 0
+        self.is_interactive = sys.stdout.isatty()
+        self.last_log_time = datetime.min
         self.setup_logging()
         self.setup_gpio()
         self.setup_signal_handlers()
@@ -31,10 +34,7 @@ class FanController:
         self.logger = logging.getLogger('pi4-fan')
         self.logger.setLevel(logging.INFO)
         
-        # Determine if running interactively
-        is_interactive = sys.stdout.isatty()
-        
-        if is_interactive:
+        if self.is_interactive:
             # Use console logging for interactive mode
             handler = logging.StreamHandler()
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -45,6 +45,22 @@ class FanController:
         
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
+
+    def should_log(self):
+        """Determine if we should log based on mode and timing"""
+        if self.is_interactive:
+            return True
+        
+        now = datetime.now()
+        if now - self.last_log_time >= timedelta(minutes=10):
+            self.last_log_time = now
+            return True
+        return False
+
+    def log_status(self, temp, target_duty, actual_duty):
+        """Log status if appropriate"""
+        if self.should_log():
+            self.logger.info(f"Temp: {temp:.1f}°C, Target PWM: {target_duty:.1f}%, Actual PWM: {actual_duty:.1f}%")
 
     def load_config(self, config_path):
         try:
@@ -114,7 +130,7 @@ class FanController:
                 target_duty = self.calculate_target_duty_cycle(temp)
                 actual_duty = self.adjust_fan_speed(target_duty)
                 
-                self.logger.info(f"Temp: {temp:.1f}°C, Target PWM: {target_duty:.1f}%, Actual PWM: {actual_duty:.1f}%")
+                self.log_status(temp, target_duty, actual_duty)
                 time.sleep(self.config['update_interval'])
                 
         except Exception as e:
