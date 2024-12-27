@@ -31,9 +31,18 @@ class FanController:
         self.logger = logging.getLogger('pi4-fan')
         self.logger.setLevel(logging.INFO)
         
-        # Use system's syslog handler
-        handler = logging.handlers.SysLogHandler(address='/dev/log', facility=logging.handlers.SysLogHandler.LOG_DAEMON)
-        formatter = logging.Formatter('pi4-fan[%(process)d]: %(levelname)s - %(message)s')
+        # Determine if running interactively
+        is_interactive = sys.stdout.isatty()
+        
+        if is_interactive:
+            # Use console logging for interactive mode
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        else:
+            # Use syslog for service mode
+            handler = logging.handlers.SysLogHandler(address='/dev/log', facility=logging.handlers.SysLogHandler.LOG_DAEMON)
+            formatter = logging.Formatter('pi4-fan[%(process)d]: %(levelname)s - %(message)s')
+        
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
