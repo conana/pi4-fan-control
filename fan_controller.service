@@ -1,0 +1,14 @@
+[Unit]
+Description=Raspberry Pi 4 Fan Controller
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/pi4-fan/fan_controller.py
+WorkingDirectory=/opt/pi4-fan
+User=root
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

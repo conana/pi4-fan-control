@@ -1,0 +1,8 @@
+{
+    "fan_pin": 14,
+    "temp_lower": 45,
+    "temp_upper": 75,
+    "pwm_frequency": 100,
+    "update_interval": 2,
+    "smoothing_factor": 0.1
+}
