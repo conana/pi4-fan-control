@@ -2,7 +2,6 @@
 
 import RPi.GPIO as GPIO
 import time
-import psutil
 import signal
 import sys
 import logging

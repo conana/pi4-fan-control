@@ -4,9 +4,12 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /opt/pi4-fan/fan_controller.py
-WorkingDirectory=/opt/pi4-fan
 User=root
+Environment=VIRTUAL_ENV=/opt/pi4-fan/pi4-fan-env
+Environment=PATH=/opt/pi4-fan/pi4-fan-env/bin:$PATH
+ExecStart=/opt/pi4-fan/pi4-fan-env/bin/python3 /opt/pi4-fan/fan_controller.py
+WorkingDirectory=/opt/pi4-fan
+SupplementaryGroups=gpio
 Restart=always
 RestartSec=5
 

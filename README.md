@@ -17,6 +17,11 @@ This project provides a smart PWM-based fan controller for the Raspberry Pi 4. I
 
 ## Installation
 
+1. Install pre-requisites:
+   ```bash
+   sudo apt update
+   sudo apt install git python3-pip python3-venv
+   ```
 1. Create the installation directory and install files:
    ```bash
    # Create directory with root, then set ownership
@@ -26,19 +31,44 @@ This project provides a smart PWM-based fan controller for the Raspberry Pi 4. I
    cd /opt/pi4-fan
    git clone https://github.com/conana/pi4-fan.git .
    ```
-
-2. Install the required Python packages:
+1. Set up Python virtual environment:
    ```bash
+   python3 -m venv pi4-fan-env
+   source pi4-fan-env/bin/activate
    pip3 install -r requirements.txt
+   deactivate
    ```
-
-3. Install the service:
+1. Add your user to the gpio group (needed for interactive use):
+   ```bash
+   sudo usermod -a -G gpio $USER
+   # Log out and back in for the group change to take effect
+   ```
+1. Install the service:
    ```bash
    sudo cp fan_controller.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable fan_controller
    sudo systemctl start fan_controller
    ```
+
+## Running Interactively
+   
+Instead of running as a service, you can run the fan controller interactively for testing or debugging:
+
+```bash
+# Activate the virtual environment
+source /opt/pi4-fan/pi4-fan-env/bin/activate
+
+# Run with sudo while preserving the virtual environment
+sudo --preserve-env=PATH,VIRTUAL_ENV python3 fan_controller.py
+```
+
+The controller will show temperature and fan speed updates in real-time. Press Ctrl+C to stop.
+
+When done testing, deactivate the virtual environment:
+```bash
+deactivate
+```
 
 ## Configuration
 
